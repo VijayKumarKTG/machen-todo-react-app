@@ -46,6 +46,23 @@ header {
   align-self: center;
 }
 
+.filters {
+  display: flex;
+  justify-content: space-evenly;
+  margin-top: 20px;
+}
+
+.filters button {
+  color: #000;
+  border: 2px solid gold;
+  padding: 5px 20px;
+  outline: none;
+  background: #ffffff;
+  cursor: pointer;
+  font-family: 'Josefin Sans', sans-serif;
+  font-weight: bold;
+}
+
 .list {
   padding: 30px 50px;
   margin-top: 50px;
@@ -54,6 +71,19 @@ header {
 .list__item {
   text-align: left;
   margin: 20px 0px;
+}
+
+.list__text {
+  width: 70%;
+}
+
+.checkbox {
+  margin: auto 30px auto 0px;
+}
+
+.checkbox input {
+  width: 15px;
+  height: 15px;
 }
 
 .border__bottom {
@@ -80,7 +110,6 @@ header {
 
 .list__layout {
   display: flex;
-  justify-content: space-between;
 }
 
 .list__icons {

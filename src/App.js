@@ -5,6 +5,7 @@ import {
   faTrashAlt,
   faPlus,
   faChevronUp,
+  faStickyNote,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 // import Fade from 'react-reveal/Fade';
@@ -20,9 +21,10 @@ class App extends React.Component {
       todos: [],
       addTodoActive: false,
       updateTodoActive: false,
+      filter: 'all',
     };
-    // this.myRef = React.createRef();
-    // this.scroll = this.scroll.bind(this);
+    this.myRef = React.createRef();
+    this.scroll = this.scroll.bind(this);
     this.onNameChange = this.onNameChange.bind(this);
     this.onNameSubmit = this.onNameSubmit.bind(this);
     this.onTodoChange = this.onTodoChange.bind(this);
@@ -31,11 +33,15 @@ class App extends React.Component {
     this.activateUpdateTodo = this.activateUpdateTodo.bind(this);
     this.onSubmitUpdateTodo = this.onSubmitUpdateTodo.bind(this);
     this.deleteTodo = this.deleteTodo.bind(this);
+    this.onFilterAll = this.onFilterAll.bind(this);
+    this.onFilterActive = this.onFilterActive.bind(this);
+    this.onFilterCompleted = this.onFilterCompleted.bind(this);
+    this.onComplete = this.onComplete.bind(this);
   }
 
-  // scroll(ref) {
-  //   ref.current.scrollIntoView({ behavior: 'smooth' });
-  // }
+  scroll(ref) {
+    ref.current.scrollIntoView({ behavior: 'smooth' });
+  }
 
   onNameChange(e) {
     this.setState({ tempName: e.target.value });
@@ -59,9 +65,13 @@ class App extends React.Component {
         let id = list.length > 0 ? list[list.length - 1].id + 1 : 1;
         let todos = [
           ...list,
-          { id, title: prevState.title, desc: prevState.desc, complted: false },
+          {
+            id,
+            title: prevState.title,
+            desc: prevState.desc,
+            completed: false,
+          },
         ];
-        console.log(todos);
         return {
           todos,
           title: '',
@@ -78,40 +88,68 @@ class App extends React.Component {
     this.setState({ addTodoActive: true });
   }
 
-  activateUpdateTodo(i, todo) {
+  activateUpdateTodo(todo) {
     this.setState({
       title: todo.title,
       desc: todo.desc,
       updateTodoActive: true,
+      i: todo.i,
     });
   }
 
-  onSubmitUpdateTodo(i) {
+  onSubmitUpdateTodo() {
     this.setState((prevState) => {
       let todos = [
-        ...prevState.todos.slice(0, i),
+        ...prevState.todos.slice(0, prevState.i),
         {
-          id: prevState.todos[i].id,
+          id: prevState.todos[prevState.i].id,
           title: prevState.title,
           desc: prevState.desc,
-          completed: false,
+          completed: prevState.todos[prevState.i].completed,
         },
-        ...prevState.todos.slice(i + 1),
+        ...prevState.todos.slice(prevState.i + 1),
       ];
-      console.log(todos);
       return {
         todos,
         updateTodoActive: false,
+        i: null,
+        title: '',
+        desc: '',
       };
     });
   }
 
   deleteTodo(i) {
     let todos = this.state.todos;
-    console.log(i);
     todos.splice(i, 1);
     this.setState({
       todos,
+    });
+  }
+
+  onFilterAll() {
+    this.setState({ filter: 'all' });
+  }
+
+  onFilterActive() {
+    this.setState({ filter: 'active' });
+  }
+
+  onFilterCompleted() {
+    this.setState({ filter: 'completed' });
+  }
+
+  onComplete(e, i) {
+    console.log(e.target);
+    this.setState((prevState) => {
+      let todos = prevState.todos.map((todo, index) => {
+        todo.completed = index === i ? !todo.completed : todo.completed;
+        return todo;
+      });
+      i = null;
+      return {
+        todos,
+      };
     });
   }
 
@@ -138,7 +176,10 @@ class App extends React.Component {
             <p className='alert__title'>
               {addTodoActive ? `Add` : `Update`} Your New Todo!
             </p>
-            <form onSubmit={this.onTodoSubmit}>
+            <form
+              onSubmit={
+                addTodoActive ? this.onTodoSubmit : this.onSubmitUpdateTodo
+              }>
               <input
                 type='text'
                 className='alert__input'
@@ -165,50 +206,51 @@ class App extends React.Component {
           <div className='brand'>Machen</div>
           <div className='username'>{name}</div>
         </header>
-        <main className='list' ref={this.myRef}>
-          <ul>
-            {todos.map((list, index) => (
-              // <Fade key={list.id}>
-              <li key={list.id} className='list__item'>
-                <div className='list__layout'>
-                  <div className='list__text'>
-                    <h2 className='list__item__title'>{list.title}</h2>
-                    <p className='list__item__desc'>{list.desc}</p>
-                  </div>
-                  <div className='list__icons'>
-                    <FontAwesomeIcon
-                      icon={faPencilAlt}
-                      className='icon'
-                      onClick={() =>
-                        this.activateUpdateTodo(index, {
-                          title: list.title,
-                          desc: list.desc,
-                        })
-                      }
-                    />{' '}
-                    |{' '}
-                    <FontAwesomeIcon
-                      icon={faTrashAlt}
-                      className='icon'
-                      onClick={() => this.deleteTodo(index)}
-                    />
-                  </div>
-                </div>
-                <p className='border__bottom'></p>
-              </li>
-              // </Fade>
-            ))}
-          </ul>
+        <main className='list'>
+          <div className='filters'>
+            <button className='filter__all' onClick={this.onFilterAll}>
+              All
+            </button>
+            <button className='filtler__active' onClick={this.onFilterActive}>
+              Active
+            </button>
+            <button
+              className='filter__complete'
+              onClick={this.onFilterCompleted}>
+              Completed
+            </button>
+          </div>
+          {todos !== [] ? (
+            <ul ref={this.myRef} id='lists'>
+              {todos.map(
+                (list, index) => (
+                  <Todo
+                    key={list.id}
+                    {...list}
+                    index={index}
+                    activateUpdateTodo={this.activateUpdateTodo}
+                    deleteTodo={this.deleteTodo}
+                    onCompleted={(e) => this.onComplete(e, index)}
+                  />
+                )
+                // <Fade key={list.id}>
+                // </Fade>
+              )}
+            </ul>
+          ) : (
+            <div className='empty__note'>
+              <FontAwesomeIcon icon={faStickyNote} />
+            </div>
+          )}
           <div className='plus'>
             <FontAwesomeIcon icon={faPlus} onClick={this.activateAddTodo} />
           </div>
           <div
             className='top'
-            // onClick={() => {
-            //   this.scroll(this.myRef);
-            // }}
-          >
-            <a href='#main' title='To Top'>
+            onClick={() => {
+              this.scroll(this.myRef);
+            }}>
+            <a href='#lists' title='To Top'>
               <FontAwesomeIcon icon={faChevronUp} />
             </a>
           </div>
@@ -220,5 +262,50 @@ class App extends React.Component {
 
 function Alert({ children }) {
   return <div className='alert'>{children}</div>;
+}
+
+function Todo({
+  title,
+  desc,
+  completed,
+  index,
+  activateUpdateTodo,
+  deleteTodo,
+  onCompleted,
+}) {
+  return (
+    <li className={completed ? 'list__item complete' : 'list__item'}>
+      <div className='list__layout'>
+        <span className='checkbox' onClick={onCompleted}>
+          <input type='button' id='complete' value='' />
+        </span>
+        <div className='list__text'>
+          <h2 className='list__item__title'>{title}</h2>
+          <p className='list__item__desc'>{desc}</p>
+        </div>
+        <div className='list__icons'>
+          <FontAwesomeIcon
+            icon={faPencilAlt}
+            className='icon'
+            onClick={() =>
+              activateUpdateTodo({
+                title: title,
+                desc: desc,
+                i: index,
+              })
+            }
+          />{' '}
+          |{' '}
+          <FontAwesomeIcon
+            icon={faTrashAlt}
+            className='icon'
+            disabled={completed}
+            onClick={() => deleteTodo(index)}
+          />
+        </div>
+      </div>
+      <p className='border__bottom'></p>
+    </li>
+  );
 }
 export default App;
