@@ -7,6 +7,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   font-family: 'Josefin Sans', sans-serif;
   text-align: center;
@@ -65,7 +69,7 @@ header {
 
 .list {
   padding: 30px 50px;
-  margin-top: 50px;
+  margin-top: 70px;
 }
 
 .list__item {
@@ -176,7 +180,7 @@ header {
   background: #fff;
   padding: 30px;
   border: 2px solid gold;
-  animation: alert 1.5s ease-in-out;
+  animation: alert 1s ease-in-out;
 }
 
 @keyframes alert {
@@ -234,4 +238,11 @@ header {
 
 .toggleActive {
   display: none;
+}
+
+@media screen and (min-width: 768px) {
+  .todos__list {
+    width: 50%;
+    margin: auto;
+  }
 }

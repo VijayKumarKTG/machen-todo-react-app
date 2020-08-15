@@ -1,14 +1,12 @@
 import React from 'react';
 import './App.css';
 import {
-  faPencilAlt,
-  faTrashAlt,
   faPlus,
   faChevronUp,
   faStickyNote,
 } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-// import Fade from 'react-reveal/Fade';
+import { Todo } from './Todo';
 
 class App extends React.Component {
   constructor(props) {
@@ -23,8 +21,6 @@ class App extends React.Component {
       updateTodoActive: false,
       filter: 'all',
     };
-    this.myRef = React.createRef();
-    this.scroll = this.scroll.bind(this);
     this.onNameChange = this.onNameChange.bind(this);
     this.onNameSubmit = this.onNameSubmit.bind(this);
     this.onTodoChange = this.onTodoChange.bind(this);
@@ -37,10 +33,6 @@ class App extends React.Component {
     this.onFilterActive = this.onFilterActive.bind(this);
     this.onFilterCompleted = this.onFilterCompleted.bind(this);
     this.onComplete = this.onComplete.bind(this);
-  }
-
-  scroll(ref) {
-    ref.current.scrollIntoView({ behavior: 'smooth' });
   }
 
   onNameChange(e) {
@@ -139,8 +131,7 @@ class App extends React.Component {
     this.setState({ filter: 'completed' });
   }
 
-  onComplete(e, i) {
-    console.log(e.target);
+  onComplete(i) {
     this.setState((prevState) => {
       let todos = prevState.todos.map((todo, index) => {
         todo.completed = index === i ? !todo.completed : todo.completed;
@@ -154,7 +145,13 @@ class App extends React.Component {
   }
 
   render() {
-    const { name, todos, addTodoActive, updateTodoActive } = this.state;
+    const { name, todos, addTodoActive, updateTodoActive, filter } = this.state;
+    let data =
+      filter === 'active'
+        ? todos.filter((list) => !list.completed)
+        : filter === 'completed'
+        ? todos.filter((list) => list.completed)
+        : todos;
     return (
       <div className='app'>
         {name === '' && (
@@ -206,7 +203,7 @@ class App extends React.Component {
           <div className='brand'>Machen</div>
           <div className='username'>{name}</div>
         </header>
-        <main className='list'>
+        <main className='list' id='top'>
           <div className='filters'>
             <button className='filter__all' onClick={this.onFilterAll}>
               All
@@ -220,22 +217,18 @@ class App extends React.Component {
               Completed
             </button>
           </div>
-          {todos !== [] ? (
-            <ul ref={this.myRef} id='lists'>
-              {todos.map(
-                (list, index) => (
-                  <Todo
-                    key={list.id}
-                    {...list}
-                    index={index}
-                    activateUpdateTodo={this.activateUpdateTodo}
-                    deleteTodo={this.deleteTodo}
-                    onCompleted={(e) => this.onComplete(e, index)}
-                  />
-                )
-                // <Fade key={list.id}>
-                // </Fade>
-              )}
+          {data !== [] ? (
+            <ul className='todos__list'>
+              {data.map((list, index) => (
+                <Todo
+                  key={list.id}
+                  {...list}
+                  index={index}
+                  activateUpdateTodo={this.activateUpdateTodo}
+                  deleteTodo={this.deleteTodo}
+                  onCompleted={() => this.onComplete(index)}
+                />
+              ))}
             </ul>
           ) : (
             <div className='empty__note'>
@@ -245,12 +238,8 @@ class App extends React.Component {
           <div className='plus'>
             <FontAwesomeIcon icon={faPlus} onClick={this.activateAddTodo} />
           </div>
-          <div
-            className='top'
-            onClick={() => {
-              this.scroll(this.myRef);
-            }}>
-            <a href='#lists' title='To Top'>
+          <div className='top'>
+            <a href='#top' title='To Top'>
               <FontAwesomeIcon icon={faChevronUp} />
             </a>
           </div>
@@ -264,48 +253,4 @@ function Alert({ children }) {
   return <div className='alert'>{children}</div>;
 }
 
-function Todo({
-  title,
-  desc,
-  completed,
-  index,
-  activateUpdateTodo,
-  deleteTodo,
-  onCompleted,
-}) {
-  return (
-    <li className={completed ? 'list__item complete' : 'list__item'}>
-      <div className='list__layout'>
-        <span className='checkbox' onClick={onCompleted}>
-          <input type='button' id='complete' value='' />
-        </span>
-        <div className='list__text'>
-          <h2 className='list__item__title'>{title}</h2>
-          <p className='list__item__desc'>{desc}</p>
-        </div>
-        <div className='list__icons'>
-          <FontAwesomeIcon
-            icon={faPencilAlt}
-            className='icon'
-            onClick={() =>
-              activateUpdateTodo({
-                title: title,
-                desc: desc,
-                i: index,
-              })
-            }
-          />{' '}
-          |{' '}
-          <FontAwesomeIcon
-            icon={faTrashAlt}
-            className='icon'
-            disabled={completed}
-            onClick={() => deleteTodo(index)}
-          />
-        </div>
-      </div>
-      <p className='border__bottom'></p>
-    </li>
-  );
-}
-export default App;
+export { App, Todo, Alert };
