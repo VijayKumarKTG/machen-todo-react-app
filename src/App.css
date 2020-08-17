@@ -245,4 +245,21 @@ header {
     width: 50%;
     margin: auto;
   }
+
+  .alert {
+    width: 50%;
+    left: 25%;
+  }
+}
+
+@media screen and (min-width: 1280px) {
+  .todos__list {
+    width: 50%;
+    margin: auto;
+  }
+
+  .alert {
+    width: 30%;
+    left: 35%;
+  }
 }

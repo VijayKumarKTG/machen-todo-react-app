@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactDOM, { render } from 'react-dom';
+import ReactDOM from 'react-dom';
 import renderer from 'react-test-renderer';
 import { App, Todo, Alert } from './App';
 
